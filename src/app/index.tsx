@@ -1,98 +1,73 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, View, StyleSheet, TouchableHighlight } from "react-native";
+import "../../global.css";
+import { Link } from "expo-router";
+import { useState } from "react";
+import { Calendar } from "react-native-calendars";
+import Navbar from "./components/UI/Navbar";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+export default function Index() {
+  const date = new Date();
+  const today = new Intl.DateTimeFormat("en-US", { day:"2-digit", weekday: "long" }).format(
+    date,
   );
-}
+   const [selectedDate, setSelectedDate] = useState('');
 
-export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <View style={styles.App}>
+      <Text className="text-white bg-green-500">{today}</Text>
+      <Link href={"./Map"} style={styles.Link}>map</Link>
+      <TouchableHighlight>
+        <Text>I am a touchable opacity</Text>
+      </TouchableHighlight>
+       <Calendar
+        // Outer Tailwind layout
+        className="bg-slate-900 rounded-3xl p-4 border border-slate-800"
+        
+        // 2. Capture the click event and update state
+        onDayPress={(day) => {
+          setSelectedDate(day.dateString);
+        }}
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        style={{
+          borderRadius:"",
+        }}
+        theme={{
+          calendarBackground: 'transparent',
+          
+          selectedDayBackgroundColor: '#6366f1',
+          selectedDayTextColor: '#ffffff',
+          
+          selectedDotColor: '#ffffff',
+          
+          agendaDayNumColor:"#000000",
+          dayTextColor: '#cbd5e1',
+          todayTextColor: '#dddddd',
+          monthTextColor: '#ffffff',
+          arrowColor: '#6366f1',
+        }}
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        markedDates={{
+          [selectedDate]: { 
+            selected: true, 
+            disableTouchEvent: true,
+          },
+        }}
+      />
+      <Navbar />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  App: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#111",
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  Link:{
+    color:"white",
+    borderColor:"white",
+    padding:2,
   },
 });
