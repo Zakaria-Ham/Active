@@ -3,8 +3,8 @@ import MapView, { Marker } from 'react-native-maps';
 
 export default function App() {
   const initialRegion = {
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: 36.7133047308867,
+    longitude: 3.1542667993899807,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   };
@@ -32,8 +32,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 48,
-    marginTop: 24,
   },
   map: {
     width: '100%',
