@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets, SafeAreaProvider } from "react-native-safe-area-context";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faClipboardList } from "@fortawesome/free-solid-svg-icons/faClipboardList";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons/faCalendar";
@@ -10,29 +10,35 @@ import { useState } from "react"
 
 export default function Layout() {
   const insets = useSafeAreaInsets();
-  const [ badgeNum, setBadgeNum  ] = useState<number>()
+  const [ badgeNum, setBadgeNum  ] = useState<number>(1)
   return (
+    <SafeAreaProvider>
     <Tabs
       screenOptions={{
-        tabBarAccessibilityLabel: "true",
         headerShown: false,
         tabBarInactiveTintColor: "#00d800",
         tabBarActiveTintColor: "#00ff00",
         tabBarInactiveBackgroundColor: "#202020",
         tabBarActiveBackgroundColor: "#101010",
-        tabBarShowLabel: false,
         tabBarStyle: {
           position: "relative",
-          paddingTop: 12,
-          height: 64 + insets.bottom,
+          justifyContent:"center",
           backgroundColor: "#202020",
+          height: 70 + insets.bottom,
+          padding: insets.bottom,
         },
         tabBarBadge: badgeNum,
+        tabBarBadgeStyle: {
+          textAlign: "center",
+          fontSize: 10,
+        },
+
       }}
     >
       <Tabs.Screen
-        name="Calendar"
+        name="Calendar/Calendar"
         options={{
+          title: "Calendar",
           tabBarIcon: ({ color, size }) => (
             <FontAwesomeIcon
               icon={faCalendar}
@@ -43,8 +49,9 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="Tasks"
+        name="Tasks/Tasks"
         options={{
+          title: "Tasks",
           tabBarIcon: ({ color, size }) => (
             <FontAwesomeIcon
               icon={faClipboardList}
@@ -55,8 +62,9 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="Home"
+        name="index"
         options={{
+          title: "Home",
           tabBarIcon: ({ color, size }) => (
             <FontAwesomeIcon
               icon={faHouse}
@@ -67,8 +75,9 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="Map"
+        name="Map/Map"
         options={{
+          title: "Map",
           tabBarIcon: ({ color, size }) => (
             <FontAwesomeIcon
               icon={faMapLocationDot}
@@ -79,8 +88,9 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="Settings"
+        name="Settings/Settings"
         options={{
+          title: "Settings",
           tabBarIcon: ({ color, size }) => (
             <FontAwesomeIcon
               icon={faSave}
@@ -91,5 +101,6 @@ export default function Layout() {
         }}
       />
     </Tabs>
+    </SafeAreaProvider>
   );
 }

@@ -7,7 +7,6 @@ export default function Calendar(){
   return (
     <View style={styles.container}>
       <CalendarComponent
-        // 2. Capture the click event and update state
         onDayPress={(day: any) => {
           setSelectedDate(day.dateString);
         }}
