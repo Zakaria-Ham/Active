@@ -1,40 +1,42 @@
-import { StyleSheet, View, Text } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { StyleSheet, View } from "react-native";
+import { WebView } from "react-native-webview";
+
+const lat = 36.7133047308867;
+const lng = 3.1542667993899807;
+
+const mapHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([${lat}, ${lng}], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([${lat}, ${lng}]).addTo(map);
+  </script>
+</body>
+</html>
+`;
 
 export default function App() {
-  const initialRegion = {
-    latitude: 36.7133047308867,
-    longitude: 3.1542667993899807,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  };
-
   return (
     <View style={styles.container}>
-      <Text>check this map</Text>
-      <MapView 
-        style={styles.map} 
-        initialRegion={initialRegion}
-      >
-        <Marker 
-          coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-          title="San Francisco"
-          description="This is a marker description"
-        />
-      </MapView>
+      <WebView originWhitelist={["*"]} source={{ html: mapHTML }} style={styles.map} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor:"#111",
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
+  container: { flex: 1 },
+  map: { flex: 1 },
 });

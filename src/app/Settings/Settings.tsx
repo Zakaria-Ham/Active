@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Settings() {
   return (
@@ -7,3 +7,17 @@ export default function Settings() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  App: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#111",
+  },
+  Link:{
+    color:"white",
+    borderColor:"white",
+    padding:2,
+  },
+});
