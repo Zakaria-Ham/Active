@@ -3,7 +3,11 @@ import { WebView } from "react-native-webview";
 
 const lat = 36.7133047308867;
 const lng = 3.1542667993899807;
-
+const Locations = [
+  {
+    
+  }
+]
 const mapHTML = `
 <!DOCTYPE html>
 <html>
@@ -20,7 +24,6 @@ const mapHTML = `
   <script>
     const map = L.map('map').setView([${lat}, ${lng}], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
     L.marker([${lat}, ${lng}]).addTo(map);
   </script>
