@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet, Pressable } from "react-native";
 import "../../global.css";
 import { Link } from "expo-router";
+import TaskWidget from "../components/taskWidget";
 
 import {
   useSafeAreaInsets,
@@ -20,6 +21,7 @@ export default function index() {
           {today}, {dayNum} {month}
         </Text>
       </View>
+      <TaskWidget />
       <Link href={"./Map/Map"} style={styles.Link}>
         map
       </Link>

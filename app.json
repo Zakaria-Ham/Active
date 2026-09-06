@@ -38,6 +38,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysPermission": "Allow this app to access your location at all times.",
+          "locationWhenInUsePermission": "Allow this app to access your location when open."
+        }
       ]
     ],
     "experiments": {
