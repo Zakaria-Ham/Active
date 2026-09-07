@@ -4,8 +4,11 @@ import { StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 export default function App() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [initialLocation, setInitialLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null,
+  );
+  const [initialLocation, setInitialLocation] =
+    useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const webViewRef = useRef<WebView>(null);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
@@ -28,7 +31,6 @@ export default function App() {
         (newLocation) => {
           setLocation(newLocation);
 
-          // Set the map's starting point only once
           setInitialLocation((prev) => prev ?? newLocation);
         },
       );
@@ -41,12 +43,9 @@ export default function App() {
     };
   }, []);
 
-  // Once the map is loaded, push every subsequent location update into the WebView
-  // instead of rebuilding mapHTML (which would reload the whole page).
   useEffect(() => {
     if (!location || !initialLocation) return;
 
-    // Skip sending the very first fix — it's already baked into the initial mapHTML.
     if (location.timestamp === initialLocation.timestamp) return;
 
     webViewRef.current?.postMessage(

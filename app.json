@@ -22,7 +22,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Actv"
+      "package": "com.redledfx.Actv",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -54,9 +58,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "782c9ff4-bec8-4ff4-b09b-c75eac9f58f4"
+        "projectId": "098a1b39-ad07-43ea-9df6-8a5242b45650"
       }
     },
-    "owner": "RedLed"
+    "owner": "redledfx"
   }
 }
