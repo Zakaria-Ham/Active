@@ -1,55 +1,27 @@
-import { Text, View, StyleSheet, Pressable } from "react-native";
-import "../../global.css";
-import { Link } from "expo-router";
-import TaskWidget from "../components/taskWidget";
+  import { Text, View } from "react-native";
+  import "../../global.css";
+  import TaskWidget from "../components/taskWidget";
+  import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+  export default function index() {
+    const insets = useSafeAreaInsets();
+    const date = new Date();
+    
+    const today = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+    const dayNum = new Intl.DateTimeFormat("en-US", { day: "2-digit" }).format(date);
+    const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
 
-export default function index() {
-  const insets = useSafeAreaInsets();
-  const date = new Date();
-  const today = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(
-    date,
-  );
-  const dayNum = new Intl.DateTimeFormat("en-US", { day: "2-digit" }).format(
-    date,
-  );
-  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(
-    date,
-  );
-
-  return (
-    <View style={styles.App}>
-      <View style={[styles.wrapper, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
-          <Text className="text-white bg-green-500">
-            {today}, {dayNum} {month}
-          </Text>
-        </View>
-        <TaskWidget title="hi" time="00:11" place="alger 1" />
+    return (
+      <View className="flex-1 bg-[#111]">
+          <View className="w-full bg-[#202020] justify-end pt-safe-offset-8 px-4">
+            <Text className="text-white text-2xl font-bold bottom-0">
+              {today}, {dayNum} {month}
+            </Text>
+          </View>
+          <View className="flex justify-center px-4 py-6">
+            <Text className="color-white font-extrabold text-3xl my-2">Welcome Back,</Text>
+          <TaskWidget title="Test ASD 3" time="00:11" place="alger 1" />
+          </View>
       </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  App: {
-    flex: 1,
-    backgroundColor: "#111",
-  },
-  wrapper: {
-    margin: 10,
-  },
-  header: {
-    top: 0,
-    display: "flex",
-    alignItems: "flex-start",
-    padding: 20,
-    fontSize: 20,
-  },
-  Link: {
-    color: "white",
-    borderColor: "white",
-    padding: 2,
-  },
-});
+    );
+  }
