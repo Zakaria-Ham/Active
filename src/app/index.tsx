@@ -13,7 +13,7 @@
 
     return (
       <View className="flex-1 bg-[#111]">
-          <View className="w-full bg-[#202020] justify-end pt-safe-offset-8 px-4">
+          <View className="w-full bg-[#202020] justify-end pt-safe-offset-8 px-4 pb-4 rounded-b-3xl">
             <Text className="text-white text-2xl font-bold bottom-0">
               {today}, {dayNum} {month}
             </Text>
