@@ -5,38 +5,51 @@ import { faMapLocationDot } from "@fortawesome/free-solid-svg-icons/faMapLocatio
 import { faSave } from "@fortawesome/free-solid-svg-icons/faSave";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Tabs, usePathname } from "expo-router";
+import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs";
 import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import AddTaskModal from "../components/addTaskModel";
+import { AppProvider, useApp } from "../context/appContext";
+import { ThemeProvider, useTheme } from "../themeContext";
 
 export default function Layout() {
   return (
     <SafeAreaProvider>
-      <TabLayout />
+      <ThemeProvider>
+        <AppProvider>
+          <TabLayout />
+        </AppProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
 function TabLayout() {
-  const Path = usePathname();
   const insets = useSafeAreaInsets();
-  const [badgeNum, setBadgeNum] = useState<number>(1);
+  const { theme } = useTheme();
+  const { settings } = useApp();
+  const pathname = usePathname();
+  const [showAddTask, setShowAddTask] = useState(false);
+  const isSettings = pathname.endsWith("/Settings/Settings");
   return (
-    <SafeAreaProvider>
+    <View style={styles.root}>
       <Tabs
+        initialRouteName="index"
+        tabBar={(props) => <CustomTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          tabBarInactiveTintColor: "#00d800",
-          tabBarActiveTintColor: "#00ff00",
-          tabBarInactiveBackgroundColor: "#202020",
-          tabBarActiveBackgroundColor: "#101010",
+          tabBarInactiveTintColor: theme.mutedText,
+          tabBarActiveTintColor: settings.accentColor,
+          tabBarInactiveBackgroundColor: theme.tabBar,
+          tabBarActiveBackgroundColor: theme.tabActive,
           tabBarStyle: {
             position: "relative",
             justifyContent: "center",
-            backgroundColor: "#202020",
-            height: 60 + insets.bottom,
+            backgroundColor: theme.tabBar,
             padding: insets.bottom,
           },
           tabBarHideOnKeyboard: true,
@@ -56,9 +69,10 @@ function TabLayout() {
         }}
       >
         <Tabs.Screen
-          name="Calendar/Calendar"
+          name="Schedule/Schedule"
           options={{
             title: "Schedule",
+            tabBarIconStyle: {},
             tabBarIcon: ({ color, size }) => (
               <FontAwesomeIcon
                 icon={faCalendar}
@@ -121,6 +135,115 @@ function TabLayout() {
           }}
         />
       </Tabs>
-    </SafeAreaProvider>
+      {!isSettings && (
+        <Pressable
+          accessibilityLabel="Add task"
+          onPress={() => setShowAddTask(true)}
+          style={[
+            styles.addButton,
+            {
+              backgroundColor: settings.accentColor,
+              bottom: 75 + insets.bottom,
+            },
+          ]}
+        >
+          <Text style={[styles.addButtonText, { color: theme.background }]}>
+            +
+          </Text>
+        </Pressable>
+      )}
+      {showAddTask && <AddTaskModal onClose={() => setShowAddTask(false)} />}
+    </View>
   );
 }
+
+function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const { settings } = useApp();
+
+  return (
+    <View
+      style={[
+        styles.customTabBar,
+        {
+          backgroundColor: theme.tabBar,
+          borderTopColor: theme.border,
+          paddingBottom: 4 + insets.bottom,
+        },
+      ]}
+    >
+      {state.routes.map((route, index) => {
+        const descriptor = descriptors[route.key];
+        const options = descriptor.options;
+        const focused = state.index === index;
+        const color = focused ? settings.accentColor : theme.mutedText;
+        const icon = options.tabBarIcon?.({
+          focused,
+          color,
+          size: 26,
+        });
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+            canPreventDefault: true,
+          });
+          if (!focused && !event.defaultPrevented) {
+            navigation.navigate(route.name, route.params);
+          }
+        };
+
+        return (
+          <Pressable
+            key={route.key}
+            accessibilityRole="tab"
+            accessibilityState={focused ? { selected: true } : {}}
+            accessibilityLabel={options.tabBarAccessibilityLabel}
+            onPress={onPress}
+            style={styles.customTabItem}
+          >
+            {icon}
+            <Text style={[styles.customTabLabel, { color }]}>
+              {options.title ?? route.name}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  customTabBar: {
+    borderTopWidth: 1,
+    flexDirection: "row",
+    minHeight: 60,
+    paddingHorizontal: 6,
+    paddingTop: 6,
+  },
+  customTabItem: {
+    alignItems: "center",
+    flex: 1,
+    gap: 5,
+    justifyContent: "center",
+    minHeight: 56,
+  },
+  customTabLabel: { fontSize: 12, fontWeight: "600" },
+  addButton: {
+    alignItems: "center",
+    borderRadius: 29,
+    elevation: 5,
+    height: 58,
+    justifyContent: "center",
+    position: "absolute",
+    right: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    width: 58,
+  },
+  addButtonText: { fontSize: 32, fontWeight: "300", lineHeight: 34 },
+});

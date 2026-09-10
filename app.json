@@ -50,7 +50,9 @@
           "locationWhenInUsePermission": "Allow this app to access your location when open."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-sqlite",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
