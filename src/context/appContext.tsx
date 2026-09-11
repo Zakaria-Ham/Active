@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import {
-    loadSettings,
-    loadTasks,
-    removeTask,
-    saveSettings,
-    saveTask,
+  loadSettings,
+  loadTasks,
+  removeTask,
+  saveSettings,
+  saveTask,
 } from "../data/localDatabase";
 import type { AppSettings, Task } from "../types";
 

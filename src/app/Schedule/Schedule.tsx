@@ -10,9 +10,10 @@ import {
 import { CATEGORY_COLORS, useApp } from "../../context/appContext";
 import { useTheme } from "../../themeContext";
 import type { Task } from "../../types";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ViewMode = "day" | "week" | "month";
-const HOURS = Array.from({ length: 18 }, (_, index) => index + 5);
+const HOURS = Array.from({ length: 21 }, (_, index) => (index + 5) % 24);
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 function formatTime(value: string) {
@@ -229,9 +230,10 @@ export default function Schedule() {
       .sort((first, second) => first.timeStart.localeCompare(second.timeStart));
   const dayTasks = getTasks(selected);
   const now = new Date();
+    const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop:insets.top, paddingBottom: 10 + insets.bottom }]}>
       <View style={styles.header}>
         <View style={styles.navigation}>
           <ArrowButton

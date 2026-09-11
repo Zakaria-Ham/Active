@@ -1,20 +1,21 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Location from "expo-location";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import {
-    CATEGORY_COLORS,
-    PRIORITY_COLORS,
-    useApp,
+  CATEGORY_COLORS,
+  PRIORITY_COLORS,
+  useApp,
 } from "../context/appContext";
 import { useTheme } from "../themeContext";
 import type { Category, Priority, SportType, StudyType, Task } from "../types";
@@ -26,13 +27,13 @@ interface Props {
   initialCoordinates?: { latitude: number; longitude: number };
 }
 
-const SPORT_TYPES: { id: SportType; label: string; hasTrail: boolean }[] = [
-  { id: "swim", label: "Swim", hasTrail: true },
-  { id: "run", label: "Run", hasTrail: true },
-  { id: "football", label: "Football", hasTrail: false },
-  { id: "gym", label: "Gym", hasTrail: true },
-  { id: "hike", label: "Hike", hasTrail: true },
-  { id: "custom", label: "Custom", hasTrail: true },
+const SPORT_TYPES: { id: SportType; label: string }[] = [
+  { id: "swim", label: "Swim" },
+  { id: "run", label: "Run" },
+  { id: "football", label: "Football" },
+  { id: "gym", label: "Gym" },
+  { id: "hike", label: "Hike" },
+  { id: "custom", label: "Custom" },
 ];
 
 const STUDY_TYPES: { id: StudyType; label: string }[] = [
@@ -82,7 +83,6 @@ interface FieldProps {
   onChangeText: (value: string) => void;
   placeholder: string;
   multiline?: boolean;
-  keyboardType?: "default" | "numeric";
 }
 
 function Field({
@@ -91,7 +91,6 @@ function Field({
   onChangeText,
   placeholder,
   multiline = false,
-  keyboardType = "default",
 }: FieldProps) {
   const { theme } = useTheme();
   return (
@@ -103,7 +102,6 @@ function Field({
         placeholder={placeholder}
         placeholderTextColor={theme.mutedText}
         multiline={multiline}
-        keyboardType={keyboardType}
         style={[
           styles.input,
           multiline && styles.multilineInput,
@@ -127,11 +125,35 @@ export default function AddTaskModal({
   const { addTask, updateTask, settings } = useApp();
   const { theme } = useTheme();
   const accent = settings.accentColor;
+
   const [name, setName] = useState(editTask?.name ?? "");
   const [description, setDescription] = useState(editTask?.description ?? "");
+  
+  // Category & Sport/Study states
+  const [category, setCategory] = useState<Category>(
+    editTask?.category ?? "activity",
+  );
+  const [sportType, setSportType] = useState<SportType>(
+    editTask?.sportType ?? "run",
+  );
+  const [sportCustomName, setSportCustomName] = useState(
+    editTask?.sportCustomName ?? "",
+  );
+  const [studyType, setStudyType] = useState<StudyType>(
+    editTask?.studyType ?? "uni",
+  );
+
+  // Date & Time states
   const [date, setDate] = useState(
     editTask?.date ?? new Date().toISOString().split("T")[0],
   );
+  const [timeStart, setTimeStart] = useState(editTask?.timeStart ?? "09:00");
+  const [timeEnd, setTimeEnd] = useState(editTask?.timeEnd ?? "10:00");
+
+  // Date/Time Picker Modal visibility states
+  const [pickerMode, setPickerMode] = useState<"date" | "startTime" | "endTime" | null>(null);
+
+  // Place states
   const [place, setPlace] = useState(editTask?.place ?? initialPlace);
   const [resolvedPlace, setResolvedPlace] = useState<{
     latitude: number;
@@ -142,22 +164,8 @@ export default function AddTaskModal({
       : (initialCoordinates ?? null),
   );
   const [placeStatus, setPlaceStatus] = useState("");
-  const [timeStart, setTimeStart] = useState(editTask?.timeStart ?? "09:00");
-  const [timeEnd, setTimeEnd] = useState(editTask?.timeEnd ?? "10:00");
-  const [category, setCategory] = useState<Category>(
-    editTask?.category ?? "activity",
-  );
-  const [sportType, setSportType] = useState<SportType>(
-    editTask?.sportType ?? "run",
-  );
-  const [sportCustomName, setSportCustomName] = useState(
-    editTask?.sportCustomName ?? "",
-  );
-  const [trailFrom, setTrailFrom] = useState(editTask?.trailFrom ?? "");
-  const [trailTo, setTrailTo] = useState(editTask?.trailTo ?? "");
-  const [studyType, setStudyType] = useState<StudyType>(
-    editTask?.studyType ?? "uni",
-  );
+
+  // Priority & Colors
   const [priority, setPriority] = useState<Priority>(
     editTask?.priority ?? "medium",
   );
@@ -172,7 +180,43 @@ export default function AddTaskModal({
   const [showCustomColor, setShowCustomColor] = useState(
     !!editTask?.color && !TASK_COLORS.includes(editTask.color),
   );
-  const activeSport = SPORT_TYPES.find((item) => item.id === sportType);
+
+  // Helper date parsing/formatting functions
+  const getDateObject = () => {
+    if (!date) return new Date();
+    const [y, m, d] = date.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  };
+
+  const getTimeObject = (timeStr: string) => {
+    const d = new Date();
+    if (!timeStr) return d;
+    const [h, m] = timeStr.split(":").map(Number);
+    d.setHours(h || 0, m || 0, 0, 0);
+    return d;
+  };
+
+  const handlePickerChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setPickerMode(null);
+    }
+    if (!selectedDate) return;
+
+    if (pickerMode === "date") {
+      const yyyy = selectedDate.getFullYear();
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const dd = String(selectedDate.getDate()).padStart(2, "0");
+      setDate(`${yyyy}-${mm}-${dd}`);
+    } else if (pickerMode === "startTime") {
+      const hh = String(selectedDate.getHours()).padStart(2, "0");
+      const mm = String(selectedDate.getMinutes()).padStart(2, "0");
+      setTimeStart(`${hh}:${mm}`);
+    } else if (pickerMode === "endTime") {
+      const hh = String(selectedDate.getHours()).padStart(2, "0");
+      const mm = String(selectedDate.getMinutes()).padStart(2, "0");
+      setTimeEnd(`${hh}:${mm}`);
+    }
+  };
 
   async function resolvePlace() {
     const query = place.trim().toLowerCase();
@@ -184,9 +228,7 @@ export default function AddTaskModal({
         const current = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
-        const isHome = ["desktop", "bureau", "home", "maison", "dar"].includes(
-          query,
-        );
+        const isHome = ["desktop", "bureau", "home", "maison", "dar"].includes(query);
         const isWork = ["work", "office"].includes(query);
         const isPitch = ["pitch", "stadium"].includes(query);
         const savedLocation = isHome
@@ -258,10 +300,6 @@ export default function AddTaskModal({
         category === "sport" && sportType === "custom"
           ? sportCustomName
           : undefined,
-      trailFrom:
-        category === "sport" && activeSport?.hasTrail ? trailFrom : undefined,
-      trailTo:
-        category === "sport" && activeSport?.hasTrail ? trailTo : undefined,
       studyType: category === "study" ? studyType : undefined,
       priority,
       color,
@@ -297,17 +335,21 @@ export default function AddTaskModal({
             <Text style={{ color: accent, fontWeight: "700" }}>Save</Text>
           </Pressable>
         </View>
+
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {/* 1. Name */}
           <Field
             label="Task Name"
             value={name}
             onChangeText={setName}
             placeholder="What do you have to do?"
           />
+
+          {/* 2. Description */}
           <Field
             label="Description"
             value={description}
@@ -315,36 +357,221 @@ export default function AddTaskModal({
             placeholder="Add details..."
             multiline
           />
+
+          {/* 3. Category */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.label, { color: theme.mutedText }]}>
+              Category
+            </Text>
+            <View style={styles.optionRow}>
+              {(["sport", "study", "activity"] as Category[]).map((item) => {
+                const active = category === item;
+                const categoryColor = CATEGORY_COLORS[item];
+                return (
+                  <Pressable
+                    key={item}
+                    onPress={() => {
+                      setCategory(item);
+                      setColor(categoryColor);
+                    }}
+                    style={[
+                      styles.option,
+                      {
+                        backgroundColor: active
+                          ? `${categoryColor}22`
+                          : theme.surface,
+                        borderColor: active ? categoryColor : theme.border,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        color: active ? categoryColor : theme.mutedText,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* 4. Sport / Study Options */}
+          {category === "sport" && (
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.label, { color: theme.mutedText }]}>
+                Sport Type
+              </Text>
+              <View style={styles.sportGrid}>
+                {SPORT_TYPES.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => setSportType(item.id)}
+                    style={[
+                      styles.option,
+                      styles.sportOption,
+                      {
+                        backgroundColor:
+                          sportType === item.id ? `${accent}22` : theme.surface,
+                        borderColor:
+                          sportType === item.id ? accent : theme.border,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        color: sportType === item.id ? accent : theme.mutedText,
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              {sportType === "custom" && (
+                <Field
+                  label="Custom Sport"
+                  value={sportCustomName}
+                  onChangeText={setSportCustomName}
+                  placeholder="Sport name..."
+                />
+              )}
+            </View>
+          )}
+
+          {category === "study" && (
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.label, { color: theme.mutedText }]}>
+                Study Level
+              </Text>
+              {STUDY_TYPES.map((item) => (
+                <Pressable
+                  key={item.id}
+                  onPress={() => setStudyType(item.id)}
+                  style={[
+                    styles.studyOption,
+                    {
+                      backgroundColor:
+                        studyType === item.id ? "#3b82f622" : theme.surface,
+                      borderColor:
+                        studyType === item.id ? "#3b82f6" : theme.border,
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.studyDot,
+                      {
+                        backgroundColor:
+                          studyType === item.id ? "#3b82f6" : theme.border,
+                      },
+                    ]}
+                  />
+                  <Text
+                    style={{
+                      color:
+                        studyType === item.id ? "#3b82f6" : theme.mutedText,
+                    }}
+                  >
+                    {item.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
+          {/* 5. Date & Time Selection */}
           <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: theme.mutedText }]}>
               Date & Time
             </Text>
-            <Field
-              label="Date"
-              value={date}
-              onChangeText={setDate}
-              placeholder="YYYY-MM-DD"
-              keyboardType="numeric"
-            />
+            
+            {/* Date Picker Button */}
+            <Pressable
+              onPress={() => setPickerMode("date")}
+              style={[
+                styles.selectButton,
+                { backgroundColor: theme.surface, borderColor: theme.border },
+              ]}
+            >
+              <Text style={[styles.selectLabel, { color: theme.mutedText }]}>
+                Date
+              </Text>
+              <Text style={[styles.selectValue, { color: theme.text }]}>
+                {date || "Select Date"}
+              </Text>
+            </Pressable>
+
+            {/* Start & End Time Buttons */}
             <View style={styles.twoColumns}>
               <View style={styles.column}>
-                <Field
-                  label="Start"
-                  value={timeStart}
-                  onChangeText={setTimeStart}
-                  placeholder="09:00"
-                />
+                <Pressable
+                  onPress={() => setPickerMode("startTime")}
+                  style={[
+                    styles.selectButton,
+                    { backgroundColor: theme.surface, borderColor: theme.border },
+                  ]}
+                >
+                  <Text style={[styles.selectLabel, { color: theme.mutedText }]}>
+                    Start Time
+                  </Text>
+                  <Text style={[styles.selectValue, { color: theme.text }]}>
+                    {timeStart || "09:00"}
+                  </Text>
+                </Pressable>
               </View>
+
               <View style={styles.column}>
-                <Field
-                  label="End"
-                  value={timeEnd}
-                  onChangeText={setTimeEnd}
-                  placeholder="10:00"
-                />
+                <Pressable
+                  onPress={() => setPickerMode("endTime")}
+                  style={[
+                    styles.selectButton,
+                    { backgroundColor: theme.surface, borderColor: theme.border },
+                  ]}
+                >
+                  <Text style={[styles.selectLabel, { color: theme.mutedText }]}>
+                    End Time
+                  </Text>
+                  <Text style={[styles.selectValue, { color: theme.text }]}>
+                    {timeEnd || "10:00"}
+                  </Text>
+                </Pressable>
               </View>
             </View>
           </View>
+
+          {/* Date & Time Picker Modal Controller */}
+          {pickerMode !== null && (
+            <View>
+              <DateTimePicker
+                value={
+                  pickerMode === "date"
+                    ? getDateObject()
+                    : pickerMode === "startTime"
+                      ? getTimeObject(timeStart)
+                      : getTimeObject(timeEnd)
+                }
+                mode={pickerMode === "date" ? "date" : "time"}
+                is24Hour={true}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={handlePickerChange}
+              />
+              {Platform.OS === "ios" && (
+                <Pressable
+                  onPress={() => setPickerMode(null)}
+                  style={[styles.doneButton, { backgroundColor: accent }]}
+                >
+                  <Text style={{ color: theme.background, fontWeight: "700" }}>
+                    Done
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          )}
+
+          {/* 6. Place Selection */}
           <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: theme.mutedText }]}>
               Place
@@ -389,145 +616,8 @@ export default function AddTaskModal({
               </Text>
             )}
           </View>
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: theme.mutedText }]}>
-              Category
-            </Text>
-            <View style={styles.optionRow}>
-              {(["sport", "study", "activity"] as Category[]).map((item) => {
-                const active = category === item;
-                const categoryColor = CATEGORY_COLORS[item];
-                return (
-                  <Pressable
-                    key={item}
-                    onPress={() => {
-                      setCategory(item);
-                      setColor(categoryColor);
-                    }}
-                    style={[
-                      styles.option,
-                      {
-                        backgroundColor: active
-                          ? `${categoryColor}22`
-                          : theme.surface,
-                        borderColor: active ? categoryColor : theme.border,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={{
-                        color: active ? categoryColor : theme.mutedText,
-                        fontWeight: "600",
-                      }}
-                    >
-                      {item.charAt(0).toUpperCase() + item.slice(1)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-          {category === "sport" && (
-            <View style={styles.fieldGroup}>
-              <Text style={[styles.label, { color: theme.mutedText }]}>
-                Sport Type
-              </Text>
-              <View style={styles.sportGrid}>
-                {SPORT_TYPES.map((item) => (
-                  <Pressable
-                    key={item.id}
-                    onPress={() => setSportType(item.id)}
-                    style={[
-                      styles.option,
-                      styles.sportOption,
-                      {
-                        backgroundColor:
-                          sportType === item.id ? `${accent}22` : theme.surface,
-                        borderColor:
-                          sportType === item.id ? accent : theme.border,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={{
-                        color: sportType === item.id ? accent : theme.mutedText,
-                      }}
-                    >
-                      {item.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-              {sportType === "custom" && (
-                <Field
-                  label="Custom Sport"
-                  value={sportCustomName}
-                  onChangeText={setSportCustomName}
-                  placeholder="Sport name..."
-                />
-              )}
-              {activeSport?.hasTrail && (
-                <View style={styles.twoColumns}>
-                  <View style={styles.column}>
-                    <Field
-                      label="From"
-                      value={trailFrom}
-                      onChangeText={setTrailFrom}
-                      placeholder="From..."
-                    />
-                  </View>
-                  <View style={styles.column}>
-                    <Field
-                      label="To"
-                      value={trailTo}
-                      onChangeText={setTrailTo}
-                      placeholder="To..."
-                    />
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
-          {category === "study" && (
-            <View style={styles.fieldGroup}>
-              <Text style={[styles.label, { color: theme.mutedText }]}>
-                Study Level
-              </Text>
-              {STUDY_TYPES.map((item) => (
-                <Pressable
-                  key={item.id}
-                  onPress={() => setStudyType(item.id)}
-                  style={[
-                    styles.studyOption,
-                    {
-                      backgroundColor:
-                        studyType === item.id ? "#3b82f622" : theme.surface,
-                      borderColor:
-                        studyType === item.id ? "#3b82f6" : theme.border,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.studyDot,
-                      {
-                        backgroundColor:
-                          studyType === item.id ? "#3b82f6" : theme.border,
-                      },
-                    ]}
-                  />
-                  <Text
-                    style={{
-                      color:
-                        studyType === item.id ? "#3b82f6" : theme.mutedText,
-                    }}
-                  >
-                    {item.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
+
+          {/* 7. Priority */}
           <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: theme.mutedText }]}>
               Priority
@@ -572,6 +662,8 @@ export default function AddTaskModal({
               })}
             </View>
           </View>
+
+          {/* 8. Color Picker */}
           <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: theme.mutedText }]}>
               Color
@@ -642,6 +734,8 @@ export default function AddTaskModal({
               />
             )}
           </View>
+
+          {/* Submit Button */}
           <Pressable
             onPress={handleSubmit}
             style={[styles.submit, { backgroundColor: accent }]}
@@ -688,6 +782,30 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   multilineInput: { minHeight: 82, textAlignVertical: "top" },
+  selectButton: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    minHeight: 48,
+    justifyContent: "center",
+  },
+  selectLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  selectValue: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  doneButton: {
+    alignItems: "center",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 8,
+  },
   twoColumns: { flexDirection: "row", gap: 10 },
   placeRow: { flexDirection: "row", gap: 8 },
   placeInput: { flex: 1 },

@@ -8,6 +8,7 @@ import {
 } from "../../context/appContext";
 import { useTheme } from "../../themeContext";
 import type { Category, Task } from "../../types";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function formatTime(value: string) {
   const [hours, minutes] = value.split(":").map(Number);
@@ -194,6 +195,7 @@ export default function Tasks() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const priorityOrder = { high: 0, medium: 1, low: 2 };
   const accent = settings.accentColor;
+  const insets = useSafeAreaInsets()
   const filteredTasks = tasks
     .filter(
       (task) => categoryFilter === "all" || task.category === categoryFilter,
@@ -223,7 +225,7 @@ export default function Tasks() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { paddingTop: insets.top}, { backgroundColor: theme.background }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

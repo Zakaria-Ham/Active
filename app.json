@@ -19,7 +19,7 @@
         "backgroundColor": "#050505",
         "foregroundImage": "./assets/images/ActvTransparent.png",
         "backgroundImage": "./assets/images/ActvBlackBG.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "monochromeImage": "./assets/images/ActvMonoLogo.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.Actv",
@@ -52,7 +52,9 @@
       ],
       "expo-font",
       "expo-sqlite",
-      "expo-image"
+      "expo-image",
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

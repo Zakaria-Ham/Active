@@ -2,7 +2,7 @@ import { faCalendar } from "@fortawesome/free-solid-svg-icons/faCalendar";
 import { faClipboardList } from "@fortawesome/free-solid-svg-icons/faClipboardList";
 import { faHouse } from "@fortawesome/free-solid-svg-icons/faHouse";
 import { faMapLocationDot } from "@fortawesome/free-solid-svg-icons/faMapLocationDot";
-import { faSave } from "@fortawesome/free-solid-svg-icons/faSave";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Tabs, usePathname } from "expo-router";
 import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs";
@@ -34,7 +34,7 @@ function TabLayout() {
   const { settings } = useApp();
   const pathname = usePathname();
   const [showAddTask, setShowAddTask] = useState(false);
-  const isSettings = pathname.endsWith("/Settings/Settings");
+  const isSettings = pathname.startsWith("/Settings");
   return (
     <View style={styles.root}>
       <Tabs
@@ -122,12 +122,12 @@ function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="Settings/Settings"
+          name="Settings"
           options={{
             title: "Settings",
             tabBarIcon: ({ color, size }) => (
               <FontAwesomeIcon
-                icon={faSave}
+                icon={faGear}
                 size={size}
                 color={color as string}
               />

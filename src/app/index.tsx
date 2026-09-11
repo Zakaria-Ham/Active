@@ -14,6 +14,7 @@ import {
 } from "../context/appContext";
 import { useTheme } from "../themeContext";
 import type { Task } from "../types";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function formatDate(date: Date) {
   return date.toLocaleDateString("en-US", {
@@ -131,6 +132,7 @@ export default function Home() {
   const { width } = useWindowDimensions();
   const [now, setNow] = useState(new Date());
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 30000);
@@ -180,7 +182,7 @@ export default function Home() {
   const categories = ["all", "sport", "study", "activity"];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top, }]}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
