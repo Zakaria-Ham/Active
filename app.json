@@ -18,7 +18,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#050505",
         "foregroundImage": "./assets/images/ActvTransparent.png",
-        "backgroundImage": "./assets/images/ActvBlackBG.png",
+        "backgroundImage": "./assets/images/ActvBlackBg.png",
         "monochromeImage": "./assets/images/ActvMonoLogo.png"
       },
       "predictiveBackGestureEnabled": false,
