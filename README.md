@@ -275,6 +275,6 @@ This project is licensed under the **MIT License** — see [`LICENSE`](./LICENSE
 
 <div align="center">
 
-Made with ❤️ by **RedLabs** · [redled.fx](https://github.com/Zakaria-Ham)
+Made for the love of the game by **RedLabs** · [redled.fx](https://github.com/Zakaria-Ham)
 
 </div>
