@@ -6,8 +6,8 @@
     {
       "layers" : [
         {
-          "image-name" : "expo-symbol 2.svg",
-          "name" : "expo-symbol 2",
+          "image-name" : "ActvTransparent.png",
+          "name" : "ActvTransparentLogo",
           "position" : {
             "scale" : 1,
             "translation-in-points" : [
@@ -17,8 +17,8 @@
           }
         },
         {
-          "image-name" : "grid.png",
-          "name" : "grid"
+          "image-name" : "ActvBlackBg.png",
+          "name" : "BlackBG"
         }
       ],
       "shadow" : {
